@@ -1,0 +1,67 @@
+<?php
+
+function tables_menu() {
+  $items = array();
+  $items['tables/movies'] = array( //this creates a URL
+   'description' => 'A table to show list of movies.',
+    'page callback' => 'tables_movies_view', //this is the function that will be called when the page is accessed.
+    // 'page arguments' => array('movies'),
+    'access callback' => TRUE ,
+    'file' => 'movies.inc',
+    );
+    $items['tables/users'] = array( //this creates a URL
+     'description' => 'A table to show list of users.',
+    'page callback' => 'tables_users_view', //this is the function that will be called when the page is accessed.
+    'access callback' => TRUE ,
+    'file' => 'users.inc',
+    );
+    $items['tables/songs'] = array( //this creates a URL
+     'description' => 'A table to show list of songs.',
+    'page callback' => 'tables_songs_view', //this is the function that will be called when the page is accessed.
+    'access callback' => TRUE ,
+    'file' => 'songs.inc',
+    );
+    return $items;
+  }
+//     $items['tables/users'] = array( //this creates a URL
+//     'description' => 'A table to show list with filters.',
+//     'page callback' => 'drupal_get_form', //this is the function that will be called when the page is accessed.
+//     'page arguments' => array('tables_form'),
+//     'access callback' => TRUE ,
+//     );
+//     return $items;
+//       }
+//   function tables_form($form, &$form_state) {
+//   $form['submit_button'] = array(
+//     '#type' => 'submit',
+//     '#value' => t('Click Here!'),
+//   );
+//     return $form;
+// }
+
+// function tables_form_validate($form, &$form_state) {
+// }
+
+// function tables_form_submit($form, &$form_state) {
+// }
+/**
+ * Implements hook_block_info().
+ */
+
+// function tables_block_info() {
+//   $blocks = array();
+//   $blocks['block_filter'] = array(
+//     'info' => t('user filter'),
+//   );
+//   return $blocks;
+// }
+// function tables_block_view($delta = '') {
+//   switch ($delta) {
+//     case 'block_filter':
+//       $block['subject'] = t('Title of first block (block_filter)');
+//       $block['content'] = t("This block's title will be changed to uppercase. Any other block with 'uppercase' in the subject or title will also be altered. If you change this block's title through the UI to omit the word 'uppercase', it will still be altered to uppercase as the subject key has not been changed.");
+//       break;
+//   }
+//   return $block;
+
+// }
