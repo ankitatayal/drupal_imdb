@@ -82,30 +82,79 @@ $query->fieldCondition('field_producer', 'target_id', "$user_id");
     $row[] = $movie_link;
     $movie_full = l(t('....See More'), $alias);
     $row[] = substr($value->body['und'][0]['value'], 0, 150).'&nbsp'.$movie_full;
-    $pro = $value->field_producer['und'][0]['target_id'];
-    $producer = user_load($pro);
-    $alias = drupal_get_path_alias('user/'.$pro);
-    $producer_last_name = isset($producer->field_last_name['und'][0]['value']) ? $producer->field_last_name['und'][0]['value'] : '';
-    $producer_link = l(t($producer->field_first_name['und'][0]['value'].' '.$producer_last_name), $alias);
-    $row[] = $producer_link;
-    $dir = $value->field_director['und'][0]['target_id'];
-    $director = user_load($dir);
-    $alias = drupal_get_path_alias('user/'.$dir);
-    $director_last_name = isset($director->field_last_name['und'][0]['value']) ? $director->field_last_name['und'][0]['value'] : '';
-    $director_link = l(t($director->field_first_name['und'][0]['value'].' '.$director_last_name), $alias);
-    $row[] = $director_link;
-    $actor = $value->field_actor['und'][0]['target_id'];
-    $actor1 = user_load($actor);
-    $alias = drupal_get_path_alias('user/'.$actor);
-    $actor_last_name = isset($actor1->field_last_name['und'][0]['value']) ? $actor1->field_last_name['und'][0]['value'] : '';
-    $actor_link = l(t($actor1->field_first_name['und'][0]['value'].' '.$actor_last_name), $alias);
-    $row[] = $actor_link;
-    $actress = $value->field_actress['und'][0]['target_id'];
-    $actress1 = user_load($actress);
-    $alias = drupal_get_path_alias('user/'.$actress);
-    $actress_last_name = isset($actress1->field_last_name['und'][0]['value']) ? $actress1->field_last_name['und'][0]['value'] : '';
-    $actress_link = l(t($actress1->field_first_name['und'][0]['value'].' '.$actress_last_name), $alias);
-    $row[] = $actress_link;
+    //get producers' names
+    $producer_link_arr = array();
+    $producer_array = isset($value->field_producer['und']) ? $value->field_producer['und'] : NULL;
+    foreach ($producer_array as $key1 => $value1) {
+      $producer = user_load($value1['target_id']);
+      $alias = drupal_get_path_alias('user/'.$value1['target_id']);
+      $producer_last_name = isset($producer->field_last_name['und'][0]['value']) ? $producer->field_last_name['und'][0]['value'] : '';
+      $producer_link = l(t($producer->field_first_name['und'][0]['value'].' '.$producer_last_name), $alias);
+      $producer_link_arr[] = $producer_link;
+    }
+    $multi_val_producer = implode(', ', $producer_link_arr);
+    $row[] = $multi_val_producer;
+    // $pro = $value->field_producer['und'][0]['target_id'];
+    // $producer = user_load($pro);
+    // $alias = drupal_get_path_alias('user/'.$pro);
+    // $producer_last_name = isset($producer->field_last_name['und'][0]['value']) ? $producer->field_last_name['und'][0]['value'] : '';
+    // $producer_link = l(t($producer->field_first_name['und'][0]['value'].' '.$producer_last_name), $alias);
+    // $row[] = $producer_link;
+    //get directors' names
+    $director_link_arr = array();
+    $director_array = isset($value->field_director['und']) ? $value->field_director['und'] : NULL;
+    foreach ($director_array as $key1 => $value1) {
+      $director = user_load($value1['target_id']);
+      $alias = drupal_get_path_alias('user/'.$value1['target_id']);
+      $director_last_name = isset($director->field_last_name['und'][0]['value']) ? $director->field_last_name['und'][0]['value'] : '';
+      $director_link = l(t($director->field_first_name['und'][0]['value'].' '.$director_last_name), $alias);
+      $director_link_arr[] = $director_link;
+    }
+    $multi_val_director = implode(', ', $director_link_arr);
+    $row[] = $multi_val_director;
+    // $dir = $value->field_director['und'][0]['target_id'];
+    // $director = user_load($dir);
+    // $alias = drupal_get_path_alias('user/'.$dir);
+    // $director_last_name = isset($director->field_last_name['und'][0]['value']) ? $director->field_last_name['und'][0]['value'] : '';
+    // $director_link = l(t($director->field_first_name['und'][0]['value'].' '.$director_last_name), $alias);
+    // $row[] = $director_link;
+    //get actor's name
+    $actor_link_arr = array();
+    $actor_array = isset($value->field_actor['und']) ? $value->field_actor['und'] : NULL;
+    foreach ($actor_array as $key1 => $value1) {
+      $actor = user_load($value1['target_id']);
+      $alias = drupal_get_path_alias('user/'.$value1['target_id']);
+      $actor_last_name = isset($actor->field_last_name['und'][0]['value']) ? $actor->field_last_name['und'][0]['value'] : '';
+      $actor_link = l(t($actor->field_first_name['und'][0]['value'].' '.$actor_last_name), $alias);
+      $actor_link_arr[] = $actor_link;
+    }
+    $multi_val_actor = implode(', ', $actor_link_arr);
+    $row[] = $multi_val_actor;
+
+    // $actor = $value->field_actor['und'][0]['target_id'];
+    // $actor1 = user_load($actor);
+    // $alias = drupal_get_path_alias('user/'.$actor);
+    // $actor_last_name = isset($actor1->field_last_name['und'][0]['value']) ? $actor1->field_last_name['und'][0]['value'] : '';
+    // $actor_link = l(t($actor1->field_first_name['und'][0]['value'].' '.$actor_last_name), $alias);
+    // $row[] = $actor_link;
+    //get actresss' names
+    $actress_link_arr = array();
+    $actress_array = isset($value->field_actress['und']) ? $value->field_actress['und'] : NULL;
+    foreach ($actress_array as $key1 => $value1) {
+      $actress = user_load($value1['target_id']);
+      $alias = drupal_get_path_alias('user/'.$value1['target_id']);
+      $actress_last_name = isset($actress->field_last_name['und'][0]['value']) ? $actress->field_last_name['und'][0]['value'] : '';
+      $actress_link = l(t($actress->field_first_name['und'][0]['value'].' '.$actress_last_name), $alias);
+      $actress_link_arr[] = $actress_link;
+    }
+    $multi_val_actress = implode(', ', $actress_link_arr);
+    $row[] = $multi_val_actress;
+    // $actress = $value->field_actress['und'][0]['target_id'];
+    // $actress1 = user_load($actress);
+    // $alias = drupal_get_path_alias('user/'.$actress);
+    // $actress_last_name = isset($actress1->field_last_name['und'][0]['value']) ? $actress1->field_last_name['und'][0]['value'] : '';
+    // $actress_link = l(t($actress1->field_first_name['und'][0]['value'].' '.$actress_last_name), $alias);
+    // $row[] = $actress_link;
     $genre = $value->field_genre['und'][0]['tid'];
     $alias = drupal_get_path_alias('taxonomy/term/'.$genre);
     $terms = taxonomy_term_load($genre);

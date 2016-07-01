@@ -7,7 +7,7 @@
 function tables_songs_view() {
   $path_curr = drupal_get_path_alias();
   $sort_order_value = isset($_GET['title']) ? $_GET['title'] : NULL;
- // $sort_order_value_rate = isset($_GET['rating']) ? $_GET['rating'] : NULL;
+ $sort_order_value_rate = isset($_GET['rating']) ? $_GET['rating'] : NULL;
   if (isset($sort_order_value)) {
     $sort_order = $sort_order_value == 'ASC' ? 'DESC' : 'ASC';
   }
@@ -20,11 +20,11 @@ function tables_songs_view() {
   // else {
   //   $sort_order_rate = 'DESC';
   // }
-  $header = array('NID', l(t('SONG NAME'), $path_curr, array('query' => array('title' => $sort_order))),'GENRE','MOVIE NAME','MOVIE DESCRIPTION','SINGER',l(t('SONG RATING'), $path_curr, array('query' => array('rating' => '$sort_order_rate'))),);
+  $header = array('NID', l(t('SONG NAME'), $path_curr, array('query' => array('title' => $sort_order))),'GENRE','MOVIE NAME','MOVIE DESCRIPTION','SINGER',l(t('SONG RATING'), $path_curr, array('query' => array('rating' => $sort_order_rate))),);
   $form_value = (drupal_get_form('tables_form'));
   dpm($form_value);
   $sng_genre = $form_value['filter']['s_genre']['#value'];
-  $sng_sort = $form_value['filter']['m_sort']['#value'];
+  $sng_sort = $form_value['filter']['s_sort']['#value'];
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'node')
   ->entityCondition('bundle', 'songs_info');
@@ -40,44 +40,60 @@ function tables_songs_view() {
   else {
     $query->propertyOrderBy('title', "$sort_order_value");
   }
-  // if (empty($sort_order_value_rate)) {
-  //   $query->fieldOrderBy('field_rating', 'value', "ASC");
-  // }
-  // else {
-  //   $query->fieldOrderBy('field_rating', 'value', "$sort_order_value_rate");
-  // }
+  if (empty($sort_order_value_rate)) {
+    $query->fieldOrderBy('field_rating', 'value', "ASC");
+  }
+  else {
+    $query->fieldOrderBy('field_rating', 'value', "$sort_order_value_rate");
+  }
   $result = $query->execute();
   if (isset($result['node'])) {
     $nids = array_keys($result['node']);
     $nodes = node_load_multiple($nids);
   }
+  dpm($nodes);
   $rows = array();
   foreach ($nodes as $key => $value) {
     $row = array();
+    //get node id
     $row[] = $value->nid;
+    //get song name
     $alias = drupal_get_path_alias('node/'.$value->nid);
     $song_link = l(t($value->title), $alias);
     $row[] = $song_link;
+    //get song genre by taxonomy songs_genre
     $genre = $value->field_song_genre['und'][0]['tid'];
     $alias = drupal_get_path_alias('taxonomy/term/'.$genre);
     $genre1 = taxonomy_term_load($genre);
     $genre_link = l(t($genre1->name), $alias);
     $row[] = $genre_link;
+    //get movie title of song
     $movie = $value->field_movie['und'][0]['target_id'];
     $movie1 = node_load($movie);
     $alias = drupal_get_path_alias('node/'.$movie);
     $movie_link = l(t($movie1->title), $alias);
     $row[] = $movie_link;
+    //get movie description
     $movie_full = l(t('....See More'), $alias);
     $row[] = substr($movie1->body['und'][0]['value'], 0, 150).'&nbsp'.$movie_full;
-    $singer = $value->field_singer['und'][0]['target_id'];
-    $alias = drupal_get_path_alias('user/'.$singer);
-    $singer_link = l(t(user_load($singer)->name), $alias);
-    $row[] = $singer_link;
+    //get singers' names
+    $singer_link_arr = array();
+    $singer_array = isset($value->field_singer['und']) ? $value->field_singer['und'] : NULL;
+    foreach ($singer_array as $key1 => $value1) {
+      $singer = user_load($value1['target_id']);
+      $alias = drupal_get_path_alias('user/'.$value1['target_id']);
+      $singer_last_name = isset($singer->field_last_name['und'][0]['value']) ? $singer->field_last_name['und'][0]['value'] : '';
+      $singer_link = l(t($singer->field_first_name['und'][0]['value'].' '.$singer_last_name), $alias);
+      $singer_link_arr[] = $singer_link;
+    }
+    $multi_val_singer = implode(', ', $singer_link_arr);
+    $row[] = $multi_val_singer;
+    //get song rating
     $row[] = $value->field_rating['und'][0]['value'];
     $rows[] = $row;
   }
-  $output = drupal_render(drupal_get_form('tables_form'));
+  $form = drupal_get_form('tables_form');
+  $output = drupal_render($form);
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
   return $output;
 }

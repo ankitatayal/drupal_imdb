@@ -47,7 +47,8 @@ function tables_users_view() {
 			$rows[] = $row;
 		}
 		$header = array('UID','FIRST NAME','LAST NAME','SEX','ROLE');
-		$out = drupal_render(drupal_get_form('tables_form'));
+		$form = drupal_get_form('tables_form');
+    $output = drupal_render($form);
 		$out .= theme('table', array('header' => $header, 'rows' => $rows));
 		return $out;
 	}
