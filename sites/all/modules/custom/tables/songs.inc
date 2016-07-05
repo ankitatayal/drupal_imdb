@@ -14,15 +14,14 @@ function tables_songs_view() {
   else {
     $sort_order = 'DESC';
   }
-  // if (isset($sort_order_value_rate)) {
-  //   $sort_order_rate = $sort_order_value_rate == 'ASC' ? 'DESC' : 'ASC';
-  // }
-  // else {
-  //   $sort_order_rate = 'DESC';
-  // }
+  if (isset($sort_order_value_rate)) {
+    $sort_order_rate = $sort_order_value_rate == 'ASC' ? 'DESC' : 'ASC';
+  }
+  else {
+    $sort_order_rate = 'ASC';
+  }
   $header = array('NID', l(t('SONG NAME'), $path_curr, array('query' => array('title' => $sort_order))),'GENRE','MOVIE NAME','MOVIE DESCRIPTION','SINGER',l(t('SONG RATING'), $path_curr, array('query' => array('rating' => $sort_order_rate))),);
   $form_value = (drupal_get_form('tables_form'));
-  dpm($form_value);
   $sng_genre = $form_value['filter']['s_genre']['#value'];
   $sng_sort = $form_value['filter']['s_sort']['#value'];
   $query = new EntityFieldQuery();
@@ -40,10 +39,7 @@ function tables_songs_view() {
   else {
     $query->propertyOrderBy('title', "$sort_order_value");
   }
-  if (empty($sort_order_value_rate)) {
-    $query->fieldOrderBy('field_rating', 'value', "ASC");
-  }
-  else {
+  if (!empty($sort_order_value_rate)  && empty($sort_order_value_rate)) {
     $query->fieldOrderBy('field_rating', 'value', "$sort_order_value_rate");
   }
   $result = $query->execute();
@@ -51,7 +47,6 @@ function tables_songs_view() {
     $nids = array_keys($result['node']);
     $nodes = node_load_multiple($nids);
   }
-  dpm($nodes);
   $rows = array();
   foreach ($nodes as $key => $value) {
     $row = array();
@@ -110,7 +105,6 @@ function tables_form($form, &$form_state) {
   foreach ($terms as $v) {
     $arr[$v->tid] = $v->name;
   }
-  dpm($arr);
   $form['filter'] = array(
     '#type' => 'fieldset',
     '#title' => t('FILTER YOUR RESULT'),

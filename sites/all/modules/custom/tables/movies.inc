@@ -12,14 +12,14 @@ function tables_movies_view() {
   else {
     $sort_order = 'DESC';
   }
-  // $sort_order_value_rate = isset($_GET['rating']) ? $_GET['rating'] : NULL;
-  // if (isset($sort_order_value_rate)) {
-  //   $sort_order_rate = $sort_order_value_rate == 'ASC' ? 'DESC' : 'ASC';
-  // }
-  // else {
-  //   $sort_order_rate = 'DESC';
-  // }
-  $header = array('NID', l(t('TITLE'), $path_curr, array('query' => array('title' => $sort_order))), 'DESCRIPTION', 'PRODUCER', 'DIRECTOR', 'ACTOR', 'ACTRESS', 'GENRE', 'LANGUAGE', l(t('MOVIE RATING'), $path_curr, array('query' => array('rating' => '$sort_order_rate'))),);
+  $sort_order_value_rate = isset($_GET['rating']) ? $_GET['rating'] : NULL;
+  if (isset($sort_order_value_rate)) {
+    $sort_order_rate = $sort_order_value_rate == 'ASC' ? 'DESC' : 'ASC';
+  }
+  else {
+    $sort_order_rate = 'ASC';
+  }
+  $header = array('NID', l(t('TITLE'), $path_curr, array('query' => array('title' => $sort_order))), 'DESCRIPTION', 'PRODUCER', 'DIRECTOR', 'ACTOR', 'ACTRESS', 'GENRE', 'LANGUAGE', l(t('MOVIE RATING'), $path_curr, array('query' => array('rating' => $sort_order_rate))),);
   $form_value = (drupal_get_form('tables_form'));
   $mov_genre = $form_value['filter']['m_genre']['#value'];
   $mov_sort = $form_value['filter']['m_sort']['#value'];
@@ -34,18 +34,15 @@ function tables_movies_view() {
   if(!empty($mov_sort)) {
     $query->propertyOrderBy('title', "$mov_sort");
   }
-  if (empty($sort_order_value)) {
+  if (!empty($sort_order_value_rate)) {
+    $query->fieldOrderBy('field_rating', 'value', "$sort_order_value_rate");
+  }
+  if (empty($sort_order_value) && empty($sort_order_value_rate)) {
     $query->propertyOrderBy('title', "ASC");
   }
   else {
     $query->propertyOrderBy('title', "$sort_order_value");
   }
-  // if (empty($sort_order_value_rate)) {
-  //   $query->fieldOrderBy('field_rating', 'value', "ASC");
-  // }
-  // else {
-  //   $query->fieldOrderBy('field_rating', 'value', "$sort_order_value_rate");
-  // }
   if(!empty($names) && !empty($mov_name)) {
     if ($names != 'movie') {
       $name = user_load_by_name($mov_name);
@@ -72,8 +69,8 @@ $query->fieldCondition('field_producer', 'target_id', "$user_id");
     $nids = array_keys($result['node']);
     $nodes = node_load_multiple($nids);
   }
-  dpm($nodes);
   $rows = array();
+  dpm($nodes);
   foreach ($nodes as $key => $value) {
     $row = array();
     $row[] = $value->nid;
@@ -85,7 +82,8 @@ $query->fieldCondition('field_producer', 'target_id', "$user_id");
     //get producers' names
     $producer_link_arr = array();
     $producer_array = isset($value->field_producer['und']) ? $value->field_producer['und'] : NULL;
-    foreach ($producer_array as $key1 => $value1) {
+    if (isset($producer_array)) {
+      foreach ($producer_array as $key1 => $value1) {
       $producer = user_load($value1['target_id']);
       $alias = drupal_get_path_alias('user/'.$value1['target_id']);
       $producer_last_name = isset($producer->field_last_name['und'][0]['value']) ? $producer->field_last_name['und'][0]['value'] : '';
@@ -94,6 +92,7 @@ $query->fieldCondition('field_producer', 'target_id', "$user_id");
     }
     $multi_val_producer = implode(', ', $producer_link_arr);
     $row[] = $multi_val_producer;
+    }
     // $pro = $value->field_producer['und'][0]['target_id'];
     // $producer = user_load($pro);
     // $alias = drupal_get_path_alias('user/'.$pro);
@@ -103,7 +102,8 @@ $query->fieldCondition('field_producer', 'target_id', "$user_id");
     //get directors' names
     $director_link_arr = array();
     $director_array = isset($value->field_director['und']) ? $value->field_director['und'] : NULL;
-    foreach ($director_array as $key1 => $value1) {
+    if (isset($director_array)) {
+      foreach ($director_array as $key1 => $value1) {
       $director = user_load($value1['target_id']);
       $alias = drupal_get_path_alias('user/'.$value1['target_id']);
       $director_last_name = isset($director->field_last_name['und'][0]['value']) ? $director->field_last_name['und'][0]['value'] : '';
@@ -112,6 +112,7 @@ $query->fieldCondition('field_producer', 'target_id', "$user_id");
     }
     $multi_val_director = implode(', ', $director_link_arr);
     $row[] = $multi_val_director;
+    }
     // $dir = $value->field_director['und'][0]['target_id'];
     // $director = user_load($dir);
     // $alias = drupal_get_path_alias('user/'.$dir);
@@ -121,7 +122,8 @@ $query->fieldCondition('field_producer', 'target_id', "$user_id");
     //get actor's name
     $actor_link_arr = array();
     $actor_array = isset($value->field_actor['und']) ? $value->field_actor['und'] : NULL;
-    foreach ($actor_array as $key1 => $value1) {
+    if (isset($actor_array)) {
+      foreach ($actor_array as $key1 => $value1) {
       $actor = user_load($value1['target_id']);
       $alias = drupal_get_path_alias('user/'.$value1['target_id']);
       $actor_last_name = isset($actor->field_last_name['und'][0]['value']) ? $actor->field_last_name['und'][0]['value'] : '';
@@ -130,6 +132,8 @@ $query->fieldCondition('field_producer', 'target_id', "$user_id");
     }
     $multi_val_actor = implode(', ', $actor_link_arr);
     $row[] = $multi_val_actor;
+    }
+
 
     // $actor = $value->field_actor['und'][0]['target_id'];
     // $actor1 = user_load($actor);
@@ -140,7 +144,8 @@ $query->fieldCondition('field_producer', 'target_id', "$user_id");
     //get actresss' names
     $actress_link_arr = array();
     $actress_array = isset($value->field_actress['und']) ? $value->field_actress['und'] : NULL;
-    foreach ($actress_array as $key1 => $value1) {
+    if (isset($actress_array)) {
+      foreach ($actress_array as $key1 => $value1) {
       $actress = user_load($value1['target_id']);
       $alias = drupal_get_path_alias('user/'.$value1['target_id']);
       $actress_last_name = isset($actress->field_last_name['und'][0]['value']) ? $actress->field_last_name['und'][0]['value'] : '';
@@ -149,6 +154,7 @@ $query->fieldCondition('field_producer', 'target_id', "$user_id");
     }
     $multi_val_actress = implode(', ', $actress_link_arr);
     $row[] = $multi_val_actress;
+    }
     // $actress = $value->field_actress['und'][0]['target_id'];
     // $actress1 = user_load($actress);
     // $alias = drupal_get_path_alias('user/'.$actress);

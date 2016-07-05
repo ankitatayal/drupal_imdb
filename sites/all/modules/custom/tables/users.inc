@@ -4,19 +4,39 @@
  * @return [table] [a table containing id,name,sex and role of users]
  */
 function tables_users_view() {
+	$path_curr = drupal_get_path_alias();
+	// sortable first name
+  $sort_order_value = isset($_GET['fname']) ? $_GET['fname'] : NULL;
+  if (isset($sort_order_value)) {
+    $sort_order = $sort_order_value == 'ASC' ? 'DESC' : 'ASC';
+  }
+  else {
+    $sort_order = 'DESC';
+  }
+  //sortable last name
+  $sort_order_value_lname = isset($_GET['lname']) ? $_GET['lname'] : NULL;
+  if (isset($sort_order_value_lname)) {
+    $sort_order_lname = $sort_order_value_lname == 'ASC' ? 'DESC' : 'ASC';
+  }
+  else {
+    $sort_order_lname = 'ASC';
+  }
+  //sortable sex
+  $sort_order_value_sex = isset($_GET['sex']) ? $_GET['sex'] : NULL;
+  if (isset($sort_order_value_sex)) {
+    $sort_order_sex = $sort_order_value_sex == 'ASC' ? 'DESC' : 'ASC';
+  }
+  else {
+    $sort_order_sex = 'ASC';
+  }
+  $header = array('UID',l(t('FIRST NAME'), $path_curr, array('query' => array('fname' => $sort_order))),l(t('LAST NAME'), $path_curr, array('query' => array('lname' => $sort_order_lname))),l(t('SEX'), $path_curr, array('query' => array('sex' => $sort_order_sex))),'ROLE');
 	$form_value = (drupal_get_form('tables_form'));
-	dpm($form_value);
 	$fname = $form_value['filter']['fname']['#value'];
 	$lname = $form_value['filter']['lname']['#value'];
 	$sex = $form_value['filter']['sex']['#value'];
-	dpm($rows);
-	dpm($fname);
-	dpm($lname);
-	dpm($sex);
 	$query = new EntityFieldQuery();
 	$query->entityCondition('entity_type', 'user');
-	if (!empty($fname))
-		{	dpm($fname);
+	if (!empty($fname)) {
 			$query->fieldCondition('field_first_name', 'value', "$fname", 'STARTS_WITH');
 		}
 		if (!empty($lname)) {
@@ -25,18 +45,33 @@ function tables_users_view() {
 		if (!empty($sex)) {
 			$query->fieldCondition('field_sex', 'value', "$sex", 'STARTS_WITH');
 		}
+		if (!empty($sort_order_value_lname)) {
+    $query->fieldOrderBy('field_last_name', 'value', "$sort_order_value_lname");
+  	}
+  	if (!empty($sort_order_value_sex)) {
+    $query->fieldOrderBy('field_sex', 'value', "$sort_order_value_sex");
+  	}
+		if (empty($sort_order_value) && empty($sort_order_value_lname) && empty($sort_order_value_sex)) {
+    $query->fieldOrderBy('field_first_name', 'value', "ASC");
+  	}
+    else {
+    $query->fieldOrderBy('field_first_name', 'value', "$sort_order_value");
+  	}
 		$result = $query->execute();
 		$uid = array_keys($result['user']);
 		$users = user_load_multiple($uid);
 		dpm($users);
 		$rows = array();
+		// $r = user_role_load_multiple($uid);
+		// dpm($r);
 		foreach ($users as $key => $value) {
 			$row = array();
 			$row[] = $value->uid;
 			$alias = drupal_get_path_alias('user/'.$value->uid);
 			$user_link = l(t($value->field_first_name['und'][0]['value']), $alias);
 			$row[] = $user_link;
-			$row[] = $value->field_last_name['und'][0]['value'];
+			$user_last_name = isset($value->field_last_name['und'][0]['value']) ? $value->field_last_name['und'][0]['value'] : ' ';
+			$row[] = $user_last_name;
 			$row[] = $value->field_sex['und'][0]['value'];
 			foreach ($value->roles as $key1 => $value1) {
 				if ($value1 != 'authenticated user') {
@@ -46,11 +81,10 @@ function tables_users_view() {
 			$row[] = $role;
 			$rows[] = $row;
 		}
-		$header = array('UID','FIRST NAME','LAST NAME','SEX','ROLE');
 		$form = drupal_get_form('tables_form');
     $output = drupal_render($form);
-		$out .= theme('table', array('header' => $header, 'rows' => $rows));
-		return $out;
+		$output .= theme('table', array('header' => $header, 'rows' => $rows));
+		return $output;
 	}
 	function tables_form($form, &$form_state) {
 		$form['filter'] = array(
